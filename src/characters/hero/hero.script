@@ -3,11 +3,12 @@ local monarch = require "monarch.monarch"
 local data = require "main.data"
 local hashed = require "main.hashed"
 
-go.property("speed", 350)
+go.property("speed", 250)
 go.property("health", 10)
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
+	msg.post("@render:", "clear_color", {color = vmath.vector4(1, 1, 1, 1)})
 	self.vel = vmath.vector3(0, 0, 0)
 	self.current_animation = nil
 	self.actions = {}
