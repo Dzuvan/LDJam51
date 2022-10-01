@@ -13,6 +13,7 @@ function init(self)
 	self.current_animation = nil
 	self.correction = vmath.vector3()
 	self.is_attacking = false
+	msg.post("sword#collisionobject", "disable")
 end
 
 function update(self, dt)
@@ -25,7 +26,8 @@ function update(self, dt)
 end
 
 local function stop_attack(self)
-	self.is_attacking = false 
+	self.is_attacking = false
+	msg.post("sword#collisionobject", "disable")
 end
 
 local function on_move(self, action_id)
@@ -49,6 +51,7 @@ local function on_move(self, action_id)
 end
 
 local function on_basic_attack(self, action_id)
+	msg.post("sword#collisionobject", "enable")
 	self.is_attacking = true
 	local sword = go.get_position("sword")
 	local angle = sword.x > 0 and 270 or -270

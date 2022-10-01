@@ -1,0 +1,33 @@
+local data = require "main.data"
+local handler = require "main.enemy"
+local hashed = require "main.hashed"
+
+go.property("speed", 85)
+go.property("health", 10)
+
+function init(self)
+	handler.on_init(self)
+end
+
+function final(self)
+	handler.on_kill(self)
+end
+
+function update(self, dt)
+	handler.search_player(self, dt)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hashed.contact_point_response then
+		if message.other_group == hashed.wall then
+			data.resolve_geometry(self, message_id, message)
+		end
+	elseif message_id == hashed["trigger_response"] then
+		if message.enter then
+			self.health = self.health-1
+			if self.health <= 0 then
+				go.delete()
+			end
+		end
+	end
+end
