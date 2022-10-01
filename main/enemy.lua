@@ -3,6 +3,7 @@
 -- require "my_directory.my_file"
 -- in any script using the functions.
 local data = require "main.data"
+local hashed = require "main.hashed"
 
 local M = {}
 
@@ -13,27 +14,27 @@ function M.search_player(self, dt)
 	local pos = go.get_position()
 
 	if pos.y < player_pos.y then
-		data.play_animation(self, hash("run"))
+		data.play_animation(self, hashed["anim_run"])
 		self.vel.y = self.speed
 	end
 
 	if pos.y > player_pos.y then
-		data.play_animation(self, hash("run"))
+		data.play_animation(self, hashed["anim_run"])
 		self.vel.y = -self.speed
 	end
 
 	if pos.x > player_pos.x then
 		self.vel.x = -self.speed
-		data.play_animation(self, hash("run"))
+		data.play_animation(self, hashed["anim_run"])
 	end
 
 	if pos.x < player_pos.x then
 		self.vel.x = self.speed
-		data.play_animation(self, hash("run"))
+		data.play_animation(self, hashed["anim_run"])
 	end
 
 	if self.vel.x == 0 and self.vel.y == 0 and not self.is_attacking then
-		data.play_animation(self, hash("idle"))
+		data.play_animation(self, hashed["anim_idle"])
 	end
 
 	sprite.set_hflip("#sprite", self.vel.x < 0)
@@ -63,7 +64,7 @@ function M.on_kill(self)
 end
 
 function M.on_heal(self, message_id, message)
-	if message_id == hash("heal") then
+	if message_id == hashed["heal"] then
 		self.health = self.health + message.amount
 	end
 end

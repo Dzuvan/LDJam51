@@ -3,6 +3,7 @@
 -- require "my_directory.my_file"
 -- in any script using the functions.
 local camera = require "orthographic.camera"
+local hashed = require "main.hashed"
 
 local M = {
   current_wave = 1,
@@ -38,11 +39,11 @@ function M.find_index(array, value)
 end
 
 function M.get_rotation(action, pos)
-    local from = pos or camera.screen_to_world(hash("/camera"), vmath.vector3(action.x, action.y, 0))
-    local to = go.get_position() - go.get_position("/camera")
-    local angle = math.atan2(to.x - from.x, from.y - to.y)
+  local from = pos or camera.screen_to_world(hashed["/camera"], vmath.vector3(action.x, action.y, 0))
+  local to = go.get_position() - go.get_position("/camera")
+  local angle = math.atan2(to.x - from.x, from.y - to.y)
 
-    return vmath.quat_rotation_z(angle)
-  end
+  return vmath.quat_rotation_z(angle)
+end
 
 return M
