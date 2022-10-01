@@ -1,0 +1,85 @@
+local camera = require "orthographic.camera"
+local monarch = require "monarch.monarch"
+local data = require "main.data"
+
+go.property("speed", 75)
+go.property("health", 10)
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.vel = vmath.vector3(0, 0, 0)
+	self.current_animation = nil
+	self.actions = {}
+	self.correction = vmath.vector3()
+end
+
+function update(self, dt)
+	if self.actions[hash("key_w")] then
+		data.play_animation(self, hash("run"))
+		self.vel.y = self.speed
+	elseif self.actions[hash("key_s")] then
+		data.play_animation(self, hash("run"))
+		self.vel.y = -self.speed
+	else
+		self.vel.y = 0
+	end
+
+	if self.actions[hash("key_a")] then
+		data.play_animation(self, hash("run"))
+		self.vel.x = -self.speed
+	elseif self.actions[hash("key_d")] then
+		data.play_animation(self, hash("run"))
+		self.vel.x = self.speed
+	else
+		self.vel.x = 0
+	end
+
+	if self.vel.x == 0 and self.vel.y == 0 or self.actions[hash("touch")] then
+		data.play_animation(self, hash("idle"))
+	end
+
+	sprite.set_hflip("#sprite", self.vel.x < 0)
+	go.set_position(go.get_position() + self.vel * dt)
+	self.correction = vmath.vector3()
+end
+
+function on_input(self, action_id, action)
+	if action_id then
+		if action.pressed then
+			self.actions[action_id] = true
+		elseif action.released then
+			if action_id == hash("touch") then
+			elseif action_id == hash("key_f1") then
+				msg.post("@system:", "toggle_physics_debug")
+			end
+			self.actions[action_id] = false
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("contact_point_response") then
+		if message.other_group == hash("wall") then
+			data.resolve_geometry(self, message_id, message)
+		elseif message.other_group == hash("projectile") then
+			go.delete(message.other_id)
+			msg.post(".", "player_hit")
+		end
+	elseif message_id == hash("player_hit") then
+		if self.health >= 1 then
+			self.health = self.health - 1
+		end
+		if self.health < 3 then
+			camera.shake(hash("/camera"), 0.003, 0.15)
+		end
+		if self.health < 1 then
+			monarch.show("game_over")
+		end
+	elseif message_id == hash("stun") then
+		self.vel = vmath.vector3(0, 0, 0)
+		self.actions = {}
+		msg.post(".", "release_input_focus")
+		timer.delay(message.duration, false, function() msg.post(".", "acquire_input_focus") end
+		)
+	end
+end
